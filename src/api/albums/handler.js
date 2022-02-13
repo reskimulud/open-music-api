@@ -7,11 +7,14 @@ class AlbumsHandler {
 
     this.postAlbumHandler = this.postAlbumHandler.bind(this);
     this.getAlbumsHandler = this.getAlbumsHandler.bind(this);
+    this.getAlbumByIdHandler = this.getAlbumByIdHandler.bind(this);
+    this.putAlbumByIdHandler = this.putAlbumByIdHandler.bind(this);
+    this.deleteAlbumByIdHandler = this.deleteAlbumByIdHandler.bind(this);
   }
 
   async postAlbumHandler(request, h) {
     try {
-      this._validator.validate(request.payload);
+      this._validator.validateAlbumPayload(request.payload);
       const {name, year} = request.payload;
 
       const albumId = await this._service.addAlbums({name, year});
@@ -23,7 +26,7 @@ class AlbumsHandler {
           albumId,
         },
       });
-      response.statusCode(201);
+      response.code(201);
       return response;
     } catch (err) {
       if (err instanceof ClientError) {
@@ -31,7 +34,7 @@ class AlbumsHandler {
           status: 'fail',
           message: err.message,
         });
-        response.statusCode(err.statusCode);
+        response.code(err.statusCode);
         return response;
       }
 
@@ -39,32 +42,21 @@ class AlbumsHandler {
         status: 'error',
         message: 'Internal server error',
       });
-      response.statusCode(500);
+      response.code(500);
       return response;
     }
   }
 
-  async getAlbumsHandler(request, h) {
-    try {
-      const albums = await this._service.getAlbums();
+  async getAlbumsHandler() {
+    const albums = await this._service.getAlbums();
 
-      const response = h.response({
-        status: 'success',
-        message: 'Albums fetched',
-        data: {
-          albums,
-        },
-      });
-      response.statusCode(200);
-      return response;
-    } catch (err) {
-      const response = h.response({
-        status: 'error',
-        message: 'Internal server error',
-      });
-      response.statusCode(500);
-      return response;
-    }
+    return {
+      status: 'success',
+      message: 'Albums fetched',
+      data: {
+        albums,
+      },
+    };
   }
 
   async getAlbumByIdHandler(request, h) {
@@ -85,7 +77,7 @@ class AlbumsHandler {
           status: 'fail',
           message: err.message,
         });
-        response.statusCode(err.statusCode);
+        response.code(err.statusCode);
         return response;
       }
 
@@ -93,14 +85,14 @@ class AlbumsHandler {
         status: 'error',
         message: 'Internal server error',
       });
-      response.statusCode(500);
+      response.code(500);
       return response;
     }
   }
 
   async putAlbumByIdHandler(request, h) {
     try {
-      this._validator.validate(request.payload);
+      this._validator.validateAlbumPayload(request.payload);
       const {id} = request.params;
 
       await this._service.updateAlbumById(id, request.payload);
@@ -115,7 +107,7 @@ class AlbumsHandler {
           status: 'fail',
           message: err.message,
         });
-        response.statusCode(err.statusCode);
+        response.code(err.statusCode);
         return response;
       }
 
@@ -123,7 +115,7 @@ class AlbumsHandler {
         status: 'error',
         message: 'Internal server error',
       });
-      response.statusCode(500);
+      response.code(500);
       return response;
     }
   }
@@ -144,7 +136,7 @@ class AlbumsHandler {
           status: 'fail',
           message: err.message,
         });
-        response.statusCode(err.statusCode);
+        response.code(err.statusCode);
         return response;
       }
 
@@ -152,10 +144,10 @@ class AlbumsHandler {
         status: 'error',
         message: 'Internal server error',
       });
-      response.statusCode(500);
+      response.code(500);
       return response;
     }
   }
 }
 
-module.export = AlbumsHandler;
+module.exports = AlbumsHandler;

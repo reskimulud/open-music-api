@@ -1,6 +1,8 @@
 /* eslint-disable max-len */
 const {Pool} = require('pg');
 const {nanoid} = require('nanoid');
+const NotFoundError = require('../exceptions/NotFoundError');
+const InvariantError = require('../exceptions/InvariantError');
 
 class AlbumsService {
   constructor() {
@@ -16,8 +18,8 @@ class AlbumsService {
     };
     const result = await this._pool.query(query);
 
-    if (!result.rows.length) {
-      throw new Error('Error adding album');
+    if (result.rowCount === 0) {
+      throw new InvariantError('Error adding album');
     }
 
     return result.rows[0].id;
@@ -28,7 +30,7 @@ class AlbumsService {
     return result.rows;
   }
 
-  async getAlbumsById(id) {
+  async getAlbumById(id) {
     const query = {
       text: 'SELECT * FROM albums WHERE id = $1',
       values: [id],
@@ -36,14 +38,14 @@ class AlbumsService {
 
     const result = await this._pool.query(query);
 
-    if (!result.rows.length) {
-      throw new Error('Album not found');
+    if (result.rowCount === 0) {
+      throw new NotFoundError('Album not found');
     }
 
     return result.rows[0];
   }
 
-  async editAlbumsById(id, {name, year}) {
+  async updateAlbumById(id, {name, year}) {
     const query = {
       text: 'UPDATE albums SET name = $1, year = $2 WHERE id = $3',
       values: [name, year, id],
@@ -51,12 +53,12 @@ class AlbumsService {
 
     const result = await this._pool.query(query);
 
-    if (!result.rows.length) {
-      throw new Error('Error editing album');
+    if (result.rowCount === 0) {
+      throw new NotFoundError('Error editing album');
     }
   }
 
-  async deleteAlbumsById(id) {
+  async deleteAlbumById(id) {
     const query = {
       text: 'DELETE FROM albums WHERE id = $1',
       values: [id],
@@ -64,8 +66,8 @@ class AlbumsService {
 
     const result = await this._pool.query(query);
 
-    if (!result.rows.length) {
-      throw new Error('Error deleting album');
+    if (result.rowCount === 0) {
+      throw new NotFoundError('Error deleting album');
     }
   }
 }
