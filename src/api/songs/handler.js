@@ -9,7 +9,7 @@ class SongsHandler {
     this.postSongHandler = this.postSongHandler.bind(this);
     this.getSongsHandler = this.getSongsHandler.bind(this);
     this.getSongByIdHandler = this.getSongByIdHandler.bind(this);
-    this.putSongByIdHandler = this.postSongHandler.bind(this);
+    this.putSongByIdHandler = this.putSongByIdHandler.bind(this);
     this.deleteSongByIdHandler = this.deleteSongByIdHandler.bind(this);
   }
 
@@ -100,12 +100,10 @@ class SongsHandler {
 
       await this._service.updateSongById(id, {title, year, genre, performer, duration, albumId});
 
-      const response = h.response({
+      return {
         status: 'success',
-        message: 'Song updated',
-      });
-      response.code(200);
-      return response;
+        message: 'Album updated',
+      };
     } catch (err) {
       if (err instanceof ClientError) {
         const response = h.response({
