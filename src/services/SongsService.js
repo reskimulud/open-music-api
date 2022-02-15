@@ -26,8 +26,23 @@ class SongsService {
     return result.rows[0].id;
   }
 
-  async getSongs() {
-    const result = await this._pool.query('SELECT * FROM songs');
+  async getSongs({title, performer}) {
+    let query;
+
+    if (title !== undefined && performer !== undefined) {
+      // eslint-disable-next-line max-len
+      query = `SELECT * FROM songs WHERE title ILIKE '%${title}%' AND performer ILIKE '%${performer}%'`;
+    } else if (title !== undefined) {
+      query = `SELECT * FROM songs WHERE title ILIKE '%${title}%'`;
+    } else if (performer !== undefined) {
+      query = `SELECT * FROM songs WHERE performer ILIKE '%${performer}%'`;
+    } else {
+      query = {
+        text: 'SELECT * FROM songs',
+      };
+    }
+
+    const result = await this._pool.query(query);
     return result.rows.map(mapDBSongToModel);
   }
 
