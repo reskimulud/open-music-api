@@ -13,7 +13,6 @@ class UsersService {
     await this.verifyNewUsername(username);
     const id = `user-${nanoid(16)}`;
     const hashedPassword = await bcrypt.hash(password, 10);
-    console.log('payload :', username, password, fullname, hashedPassword);
     const query = {
       text: 'INSERT INTO users VALUES($1, $2, $3, $4) RETURNING id',
       values: [id, username, hashedPassword, fullname],
@@ -24,8 +23,6 @@ class UsersService {
     if (result.rowCount === 0) {
       throw new InvariantError('User was not added');
     }
-
-    console.log('result :', result);
 
     return result.rows[0].id;
   }
