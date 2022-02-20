@@ -49,16 +49,34 @@ class SongsHandler {
   }
 
   async getSongsHandler(request) {
-    const {title, performer} = request.query;
-    const songs = await this._service.getSongs({title, performer});
+    try {
+      const {title, performer} = request.query;
+      const songs = await this._service.getSongs({title, performer});
 
-    return {
-      status: 'success',
-      message: 'Songs fetched',
-      data: {
-        songs,
-      },
-    };
+      return {
+        status: 'success',
+        message: 'Songs fetched',
+        data: {
+          songs,
+        },
+      };
+    } catch (err) {
+      if (err instanceof ClientError) {
+        const response = h.response({
+          status: 'fail',
+          message: err.message,
+        });
+        response.code(err.statusCode);
+        return response;
+      }
+
+      const response = h.response({
+        status: 'error',
+        message: 'Internal server error',
+      });
+      response.code(500);
+      return response;
+    }
   }
 
   async getSongByIdHandler(request, h) {
