@@ -12,9 +12,10 @@ class UsersService {
   async addUser({username, password, fullname}) {
     await this.verifyNewUsername(username);
     const id = `user-${nanoid(16)}`;
-    const hashedPassword = bcrypt.hash(password, 10);
+    const hashedPassword = await bcrypt.hash(password, 10);
+    console.log('payload :', username, password, fullname, hashedPassword);
     const query = {
-      text: 'INSERT INTO VALUES ($1, $2, $3, $4) RETURNING id',
+      text: 'INSERT INTO users VALUES($1, $2, $3, $4) RETURNING id',
       values: [id, username, hashedPassword, fullname],
     };
 
@@ -23,6 +24,8 @@ class UsersService {
     if (result.rowCount === 0) {
       throw new InvariantError('User was not added');
     }
+
+    console.log('result :', result);
 
     return result.rows[0].id;
   }
@@ -42,7 +45,7 @@ class UsersService {
 
   async getUserById(id) {
     const query = {
-      text: 'SELECT * FROM users WHERE id = $1',
+      text: 'SELECT id, username FROM users WHERE id = $1',
       values: [id],
     };
 

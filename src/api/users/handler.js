@@ -4,6 +4,9 @@ class UsersHandler {
   constructor(service, validator) {
     this._service = service;
     this._validator = validator;
+
+    this.postUserHandler = this.postUserHandler.bind(this);
+    this.getUserByIdHandler = this.getUserByIdHandler.bind(this);
   }
 
   async postUserHandler(request, h) {
@@ -23,7 +26,7 @@ class UsersHandler {
           userId,
         },
       });
-      response.code(2001);
+      response.code(201);
       return response;
     } catch (err) {
       if (err instanceof ClientError) {
@@ -40,6 +43,7 @@ class UsersHandler {
         message: 'Internal server error',
       });
       response.code(500);
+      console.error(err);
       return response;
     }
   }
