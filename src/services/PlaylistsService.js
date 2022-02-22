@@ -1,5 +1,6 @@
 const {nanoid} = require('nanoid');
 const {Pool} = require('pg');
+const AuthorizationError = require('../exceptions/AuthorizationError');
 const InvariantError = require('../exceptions/InvariantError');
 const NotFoundError = require('../exceptions/NotFoundError');
 
@@ -63,6 +64,23 @@ class PlaylistsService {
 
     if (result.rowCount === 0) {
       throw new NotFoundError('Playlist not found');
+    }
+  }
+
+  async verifyPlaylistOwner(id, owner) {
+    const query = {
+      text: 'SELECT owner FROM playlist WHERE id = $1',
+      values: [id],
+    };
+
+    const result = await this._pool.query(query);
+
+    if (result.rowCount === 0) {
+      throw new NotFoundError('Playlist not found');
+    }
+
+    if (result.rows[0].owner !== owner) {
+      throw new AuthorizationError('You are not the owner of this playlist');
     }
   }
 }
