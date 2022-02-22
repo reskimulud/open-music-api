@@ -10,6 +10,8 @@ class PlaylistsHandler {
     this.getPlaylistsHandler = this.getPlaylistsHandler.bind(this);
     this.getPlaylistByIdHandler = this.getPlaylistByIdHandler.bind(this);
     this.deletePlaylistByIdHandler = this.deletePlaylistByIdHandler.bind(this);
+    // eslint-disable-next-line max-len
+    this.deletePlaylistSongByIdHandler = this.deletePlaylistSongByIdHandler.bind(this);
   }
 
   async postPlaylistHandler(request, h) {
@@ -57,6 +59,9 @@ class PlaylistsHandler {
       this._validator.validatePostPlaylistSongPayload(request.payload);
       const {id: playlistId} = request.params;
       const {songId} = request.payload;
+
+      const {id: credentialId} = request.auth.credentials;
+      await this._service.verifyPlaylistOwner(playlistId, credentialId);
 
       const songlistId = await this._service.addSonglist(playlistId, songId);
 
@@ -165,6 +170,40 @@ class PlaylistsHandler {
       return {
         status: 'success',
         message: 'Playlist deleted',
+      };
+    } catch (err) {
+      if (err instanceof ClientError) {
+        const response = h.response({
+          status: 'fail',
+          message: err.message,
+        });
+        response.code(err.statusCode);
+        return response;
+      }
+
+      const response = h.response({
+        status: 'error',
+        message: 'Internal Server Error',
+      });
+      response.code(500);
+      console.error(err);
+      return response;
+    }
+  }
+
+  async deletePlaylistSongByIdHandler(request, h) {
+    try {
+      this._validator.validateDeletePlaylistSongPayload(request.payload);
+      const {id: playlistId} = request.params;
+      const {songId} = request.payload;
+      const {id: credentialId} = request.auth.credentials;
+
+      await this._service.verifyPlaylistOwner(playlistId, credentialId);
+      await this._service.deleteSonglistByPlaylistAndSongId(playlistId, songId);
+
+      return {
+        status: 'success',
+        message: 'Song deleted from playlist',
       };
     } catch (err) {
       if (err instanceof ClientError) {

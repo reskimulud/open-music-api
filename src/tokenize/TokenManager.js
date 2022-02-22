@@ -4,7 +4,6 @@ const InvariantError = require('../exceptions/InvariantError');
 
 const TokenManager = {
   generateAccessToken: (payload) => {
-    console.log('payload :', payload);
     return Jwt.token.generate(payload, process.env.ACCESS_TOKEN_KEY);
   },
   generateRefreshToken: (payload) => Jwt.token.generate(payload, process.env.REFRESH_TOKEN_KEY),

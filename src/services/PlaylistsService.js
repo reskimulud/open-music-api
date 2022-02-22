@@ -120,6 +120,19 @@ class PlaylistsService {
     }
   }
 
+  async deleteSonglistByPlaylistAndSongId(playlistId, songId) {
+    const query = {
+      text: 'DELETE FROM songlists WHERE playlist_id = $1 AND song_id = $2',
+      values: [playlistId, songId],
+    };
+
+    const result = await this._pool.query(query);
+
+    if (result.rowCount === 0) {
+      throw new NotFoundError('Song not found');
+    }
+  }
+
   async verifyPlaylistOwner(id, owner) {
     const query = {
       text: 'SELECT owner FROM playlist WHERE id = $1',
