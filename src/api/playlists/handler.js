@@ -6,6 +6,7 @@ class PlaylistsHandler {
     this._validator = validator;
 
     this.postPlaylistHandler = this.postPlaylistHandler.bind(this);
+    this.postPlaylistSongHandler = this.postPlaylistSongHandler.bind(this);
     this.getPlaylistsHandler = this.getPlaylistsHandler.bind(this);
     this.getPlaylistByIdHandler = this.getPlaylistByIdHandler.bind(this);
     this.deletePlaylistByIdHandler = this.deletePlaylistByIdHandler.bind(this);
@@ -31,6 +32,43 @@ class PlaylistsHandler {
       });
       respons.code(201);
       return respons;
+    } catch (err) {
+      if (err instanceof ClientError) {
+        const response = h.response({
+          status: 'fail',
+          message: err.message,
+        });
+        response.code(err.statusCode);
+        return response;
+      }
+
+      const response = h.response({
+        status: 'error',
+        message: 'Internal Server Error',
+      });
+      response.code(500);
+      console.error(err);
+      return response;
+    }
+  }
+
+  async postPlaylistSongHandler(request, h) {
+    try {
+      this._validator.validatePostPlaylistSongPayload(request.payload);
+      const {id: playlistId} = request.params;
+      const {songId} = request.payload;
+
+      const songlistId = await this._service.addSonglist(playlistId, songId);
+
+      const response = h.response({
+        status: 'success',
+        message: 'Song added to playlist',
+        data: {
+          songlistId,
+        },
+      });
+      response.code(201);
+      return response;
     } catch (err) {
       if (err instanceof ClientError) {
         const response = h.response({
