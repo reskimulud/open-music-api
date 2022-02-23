@@ -33,6 +33,7 @@ const PlaylistsValidator = require('./validator/playlists');
 const collaborations = require('./api/collaborations');
 const CollaborationsService = require('./services/CollaborationsService');
 const CollaborationsValidator = require('./validator/collaborations');
+const ClientError = require('./exceptions/ClientError');
 
 
 const init = async () => {
@@ -124,6 +125,22 @@ const init = async () => {
       },
     },
   ]);
+
+  // extension
+  server.ext('onPreResponse', (request, h) => {
+    const {response} = request;
+
+    if (response instanceof ClientError) {
+      const newResponse = h.response({
+        status: 'fail',
+        message: response.message,
+      });
+      newResponse.code(response.statusCode);
+      return newResponse;
+    }
+
+    return h.continue;
+  });
 
   await server.start();
   console.log('Server running on %s', server.info.uri);

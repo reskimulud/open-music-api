@@ -1,5 +1,3 @@
-const ClientError = require('../../exceptions/ClientError');
-
 class AlbumsHandler {
   constructor(service, validator) {
     this._service = service;
@@ -13,158 +11,68 @@ class AlbumsHandler {
   }
 
   async postAlbumHandler(request, h) {
-    try {
-      this._validator.validateAlbumPayload(request.payload);
-      const {name, year} = request.payload;
+    this._validator.validateAlbumPayload(request.payload);
+    const {name, year} = request.payload;
 
-      const albumId = await this._service.addAlbums({name, year});
+    const albumId = await this._service.addAlbums({name, year});
 
-      const response = h.response({
-        status: 'success',
-        message: 'Album added',
-        data: {
-          albumId,
-        },
-      });
-      response.code(201);
-      return response;
-    } catch (err) {
-      if (err instanceof ClientError) {
-        const response = h.response({
-          status: 'fail',
-          message: err.message,
-        });
-        response.code(err.statusCode);
-        return response;
-      }
-
-      const response = h.response({
-        status: 'error',
-        message: 'Internal server error',
-      });
-      response.code(500);
-      return response;
-    }
+    const response = h.response({
+      status: 'success',
+      message: 'Album added',
+      data: {
+        albumId,
+      },
+    });
+    response.code(201);
+    return response;
   }
 
   async getAlbumsHandler() {
-    try {
-      const albums = await this._service.getAlbums();
+    const albums = await this._service.getAlbums();
 
-      return {
-        status: 'success',
-        message: 'Albums fetched',
-        data: {
-          albums,
-        },
-      };
-    } catch (err) {
-      if (err instanceof ClientError) {
-        const response = h.response({
-          status: 'fail',
-          message: err.message,
-        });
-        response.code(err.statusCode);
-        return response;
-      }
-
-      const response = h.response({
-        status: 'error',
-        message: 'Internal server error',
-      });
-      response.code(500);
-      return response;
-    }
+    return {
+      status: 'success',
+      message: 'Albums fetched',
+      data: {
+        albums,
+      },
+    };
   }
 
   async getAlbumByIdHandler(request, h) {
-    try {
-      const {id} = request.params;
-      const album = await this._service.getAlbumById(id);
+    const {id} = request.params;
+    const album = await this._service.getAlbumById(id);
 
-      return {
-        status: 'success',
-        message: 'Album fetched',
-        data: {
-          album,
-        },
-      };
-    } catch (err) {
-      if (err instanceof ClientError) {
-        const response = h.response({
-          status: 'fail',
-          message: err.message,
-        });
-        response.code(err.statusCode);
-        return response;
-      }
-
-      const response = h.response({
-        status: 'error',
-        message: 'Internal server error',
-      });
-      response.code(500);
-      return response;
-    }
+    return {
+      status: 'success',
+      message: 'Album fetched',
+      data: {
+        album,
+      },
+    };
   }
 
   async putAlbumByIdHandler(request, h) {
-    try {
-      this._validator.validateAlbumPayload(request.payload);
-      const {id} = request.params;
+    this._validator.validateAlbumPayload(request.payload);
+    const {id} = request.params;
 
-      await this._service.updateAlbumById(id, request.payload);
+    await this._service.updateAlbumById(id, request.payload);
 
-      return {
-        status: 'success',
-        message: 'Album updated',
-      };
-    } catch (err) {
-      if (err instanceof ClientError) {
-        const response = h.response({
-          status: 'fail',
-          message: err.message,
-        });
-        response.code(err.statusCode);
-        return response;
-      }
-
-      const response = h.response({
-        status: 'error',
-        message: 'Internal server error',
-      });
-      response.code(500);
-      return response;
-    }
+    return {
+      status: 'success',
+      message: 'Album updated',
+    };
   }
 
   async deleteAlbumByIdHandler(request, h) {
-    try {
-      const {id} = request.params;
+    const {id} = request.params;
 
-      await this._service.deleteAlbumById(id);
+    await this._service.deleteAlbumById(id);
 
-      return {
-        status: 'success',
-        message: 'Album deleted',
-      };
-    } catch (err) {
-      if (err instanceof ClientError) {
-        const response = h.response({
-          status: 'fail',
-          message: err.message,
-        });
-        response.code(err.statusCode);
-        return response;
-      }
-
-      const response = h.response({
-        status: 'error',
-        message: 'Internal server error',
-      });
-      response.code(500);
-      return response;
-    }
+    return {
+      status: 'success',
+      message: 'Album deleted',
+    };
   }
 }
 

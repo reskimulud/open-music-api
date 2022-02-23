@@ -1,6 +1,4 @@
 /* eslint-disable max-len */
-const ClientError = require('../../exceptions/ClientError');
-
 class PlaylistsHandler {
   constructor(service, validator) {
     this._service = service;
@@ -16,263 +14,130 @@ class PlaylistsHandler {
   }
 
   async postPlaylistHandler(request, h) {
-    try {
-      this._validator.validatePostPlaylistPayload(request.payload);
-      const {name = 'untitled'} = request.payload;
-      const {id: credentialId} = request.auth.credentials;
+    this._validator.validatePostPlaylistPayload(request.payload);
+    const {name = 'untitled'} = request.payload;
+    const {id: credentialId} = request.auth.credentials;
 
-      const playlistId = await this._service.addPlaylist({
-        name,
-        owner: credentialId,
-      });
+    const playlistId = await this._service.addPlaylist({
+      name,
+      owner: credentialId,
+    });
 
-      const respons = h.response({
-        status: 'success',
-        message: 'Playlist added',
-        data: {
-          playlistId,
-        },
-      });
-      respons.code(201);
-      return respons;
-    } catch (err) {
-      if (err instanceof ClientError) {
-        const response = h.response({
-          status: 'fail',
-          message: err.message,
-        });
-        response.code(err.statusCode);
-        return response;
-      }
-
-      const response = h.response({
-        status: 'error',
-        message: 'Internal Server Error',
-      });
-      response.code(500);
-      console.error('post playlist :', err);
-      return response;
-    }
+    const respons = h.response({
+      status: 'success',
+      message: 'Playlist added',
+      data: {
+        playlistId,
+      },
+    });
+    respons.code(201);
+    return respons;
   }
 
   async postPlaylistSongHandler(request, h) {
-    try {
-      this._validator.validatePostPlaylistSongPayload(request.payload);
-      const {id: playlistId} = request.params;
-      const {songId} = request.payload;
+    this._validator.validatePostPlaylistSongPayload(request.payload);
+    const {id: playlistId} = request.params;
+    const {songId} = request.payload;
 
-      const {id: credentialId} = request.auth.credentials;
-      await this._service.verifyPlaylistAccess(playlistId, credentialId);
+    const {id: credentialId} = request.auth.credentials;
+    await this._service.verifyPlaylistAccess(playlistId, credentialId);
 
-      const songlistId = await this._service.addSonglist(playlistId, songId);
+    const songlistId = await this._service.addSonglist(playlistId, songId);
 
-      await this._service.addPlaylistActivity(
-          playlistId,
-          credentialId,
-          songId,
-          'add',
-      );
+    await this._service.addPlaylistActivity(
+        playlistId,
+        credentialId,
+        songId,
+        'add',
+    );
 
-      const response = h.response({
-        status: 'success',
-        message: 'Song added to playlist',
-        data: {
-          songlistId,
-        },
-      });
-      response.code(201);
-      return response;
-    } catch (err) {
-      if (err instanceof ClientError) {
-        const response = h.response({
-          status: 'fail',
-          message: err.message,
-        });
-        response.code(err.statusCode);
-        return response;
-      }
-
-      const response = h.response({
-        status: 'error',
-        message: 'Internal Server Error',
-      });
-      response.code(500);
-      console.error('post playlist song :', err);
-      return response;
-    }
+    const response = h.response({
+      status: 'success',
+      message: 'Song added to playlist',
+      data: {
+        songlistId,
+      },
+    });
+    response.code(201);
+    return response;
   }
 
   async getPlaylistsHandler(request, h) {
-    try {
-      const {id: credentialId} = request.auth.credentials;
-      const playlists = await this._service.getPlaylists(credentialId);
-      return {
-        status: 'success',
-        message: 'Playlists retrieved',
-        data: {
-          playlists,
-        },
-      };
-    } catch (err) {
-      if (err instanceof ClientError) {
-        const response = h.response({
-          status: 'fail',
-          message: err.message,
-        });
-        response.code(err.statusCode);
-        return response;
-      }
-
-      const response = h.response({
-        status: 'error',
-        message: 'Internal Server Error',
-      });
-      response.code(500);
-      console.error('get playlist :', err);
-      return response;
-    }
+    const {id: credentialId} = request.auth.credentials;
+    const playlists = await this._service.getPlaylists(credentialId);
+    return {
+      status: 'success',
+      message: 'Playlists retrieved',
+      data: {
+        playlists,
+      },
+    };
   }
 
   async getPlaylistByIdHandler(request, h) {
-    try {
-      const {id} = request.params;
-      const {id: credentialId} = request.auth.credentials;
+    const {id} = request.params;
+    const {id: credentialId} = request.auth.credentials;
 
-      await this._service.verifyPlaylistAccess(id, credentialId);
-      const playlist = await this._service.getPlaylistById(id);
-      return {
-        status: 'success',
-        message: 'Playlist retrieved',
-        data: {
-          playlist,
-        },
-      };
-    } catch (err) {
-      if (err instanceof ClientError) {
-        const response = h.response({
-          status: 'fail',
-          message: err.message,
-        });
-        response.code(err.statusCode);
-        return response;
-      }
-
-      const response = h.response({
-        status: 'error',
-        message: 'Internal Server Error',
-      });
-      response.code(500);
-      console.error('get playlist by id :', err);
-      return response;
-    }
+    await this._service.verifyPlaylistAccess(id, credentialId);
+    const playlist = await this._service.getPlaylistById(id);
+    return {
+      status: 'success',
+      message: 'Playlist retrieved',
+      data: {
+        playlist,
+      },
+    };
   }
 
   async getPlaylistActivitiesdHandler(request, h) {
-    try {
-      const {id: playlistId} = request.params;
-      const {id: credentialId} = request.auth.credentials;
+    const {id: playlistId} = request.params;
+    const {id: credentialId} = request.auth.credentials;
 
-      await this._service.verifyPlaylistAccess(playlistId, credentialId);
-      const activities = await this._service.getPlaylistActivities(playlistId);
+    await this._service.verifyPlaylistAccess(playlistId, credentialId);
+    const activities = await this._service.getPlaylistActivities(playlistId);
 
-      return {
-        status: 'success',
-        message: 'Playlist activities retrieved',
-        data: {
-          playlistId: playlistId,
-          activities,
-        },
-      };
-    } catch (err) {
-      if (err instanceof ClientError) {
-        const response = h.response({
-          status: 'fail',
-          message: err.message,
-        });
-        response.code(err.statusCode);
-        return response;
-      }
-
-      const response = h.response({
-        status: 'error',
-        message: 'Internal Server Error',
-      });
-      response.code(500);
-      console.error('get playlist activity :', err);
-      return response;
-    }
+    return {
+      status: 'success',
+      message: 'Playlist activities retrieved',
+      data: {
+        playlistId: playlistId,
+        activities,
+      },
+    };
   }
 
   async deletePlaylistByIdHandler(request, h) {
-    try {
-      const {id} = request.params;
-      const {id: credentialId} = request.auth.credentials;
+    const {id} = request.params;
+    const {id: credentialId} = request.auth.credentials;
 
-      await this._service.verifyPlaylistOwner(id, credentialId);
-      await this._service.deletePlaylistById(id);
+    await this._service.verifyPlaylistOwner(id, credentialId);
+    await this._service.deletePlaylistById(id);
 
-      return {
-        status: 'success',
-        message: 'Playlist deleted',
-      };
-    } catch (err) {
-      if (err instanceof ClientError) {
-        const response = h.response({
-          status: 'fail',
-          message: err.message,
-        });
-        response.code(err.statusCode);
-        return response;
-      }
-
-      const response = h.response({
-        status: 'error',
-        message: 'Internal Server Error',
-      });
-      response.code(500);
-      console.error('delete playlist by id :', err);
-      return response;
-    }
+    return {
+      status: 'success',
+      message: 'Playlist deleted',
+    };
   }
 
   async deletePlaylistSongByIdHandler(request, h) {
-    try {
-      this._validator.validateDeletePlaylistSongPayload(request.payload);
-      const {id: playlistId} = request.params;
-      const {songId} = request.payload;
-      const {id: credentialId} = request.auth.credentials;
+    this._validator.validateDeletePlaylistSongPayload(request.payload);
+    const {id: playlistId} = request.params;
+    const {songId} = request.payload;
+    const {id: credentialId} = request.auth.credentials;
 
-      await this._service.verifyPlaylistAccess(playlistId, credentialId);
-      await this._service.deleteSonglistByPlaylistAndSongId(playlistId, songId);
-      await this._service.addPlaylistActivity(
-          playlistId,
-          credentialId,
-          songId,
-          'delete',
-      );
+    await this._service.verifyPlaylistAccess(playlistId, credentialId);
+    await this._service.deleteSonglistByPlaylistAndSongId(playlistId, songId);
+    await this._service.addPlaylistActivity(
+        playlistId,
+        credentialId,
+        songId,
+        'delete',
+    );
 
-      return {
-        status: 'success',
-        message: 'Song deleted from playlist',
-      };
-    } catch (err) {
-      if (err instanceof ClientError) {
-        const response = h.response({
-          status: 'fail',
-          message: err.message,
-        });
-        response.code(err.statusCode);
-        return response;
-      }
-
-      const response = h.response({
-        status: 'error',
-        message: 'Internal Server Error',
-      });
-      response.code(500);
-      console.error('delete playlist song :', err);
-      return response;
-    }
+    return {
+      status: 'success',
+      message: 'Song deleted from playlist',
+    };
   }
 }
 
