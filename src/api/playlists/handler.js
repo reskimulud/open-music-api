@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 const ClientError = require('../../exceptions/ClientError');
 
 class PlaylistsHandler {
@@ -9,8 +10,8 @@ class PlaylistsHandler {
     this.postPlaylistSongHandler = this.postPlaylistSongHandler.bind(this);
     this.getPlaylistsHandler = this.getPlaylistsHandler.bind(this);
     this.getPlaylistByIdHandler = this.getPlaylistByIdHandler.bind(this);
+    this.getPlaylistActivitiesdHandler = this.getPlaylistActivitiesdHandler.bind(this);
     this.deletePlaylistByIdHandler = this.deletePlaylistByIdHandler.bind(this);
-    // eslint-disable-next-line max-len
     this.deletePlaylistSongByIdHandler = this.deletePlaylistSongByIdHandler.bind(this);
   }
 
@@ -64,6 +65,13 @@ class PlaylistsHandler {
       await this._service.verifyPlaylistOwner(playlistId, credentialId);
 
       const songlistId = await this._service.addSonglist(playlistId, songId);
+
+      await this._service.addPlaylistActivity(
+          playlistId,
+          credentialId,
+          songId,
+          'add',
+      );
 
       const response = h.response({
         status: 'success',
@@ -159,6 +167,42 @@ class PlaylistsHandler {
     }
   }
 
+  async getPlaylistActivitiesdHandler(request, h) {
+    try {
+      const {id: playlistId} = request.params;
+      const {id: credentialId} = request.auth.credentials;
+
+      await this._service.verifyPlaylistOwner(playlistId, credentialId);
+      const activities = await this._service.getPlaylistActivities(playlistId);
+
+      return {
+        status: 'success',
+        message: 'Playlist activities retrieved',
+        data: {
+          playlistId: playlistId,
+          activities,
+        },
+      };
+    } catch (err) {
+      if (err instanceof ClientError) {
+        const response = h.response({
+          status: 'fail',
+          message: err.message,
+        });
+        response.code(err.statusCode);
+        return response;
+      }
+
+      const response = h.response({
+        status: 'error',
+        message: 'Internal Server Error',
+      });
+      response.code(500);
+      console.error(err);
+      return response;
+    }
+  }
+
   async deletePlaylistByIdHandler(request, h) {
     try {
       const {id} = request.params;
@@ -200,6 +244,12 @@ class PlaylistsHandler {
 
       await this._service.verifyPlaylistOwner(playlistId, credentialId);
       await this._service.deleteSonglistByPlaylistAndSongId(playlistId, songId);
+      await this._service.addPlaylistActivity(
+          playlistId,
+          credentialId,
+          songId,
+          'delete',
+      );
 
       return {
         status: 'success',

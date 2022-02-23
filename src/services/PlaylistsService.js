@@ -149,6 +149,46 @@ class PlaylistsService {
       throw new AuthorizationError('You are not the owner of this playlist');
     }
   }
+
+  async addPlaylistActivity(playlistId, userId, songId, action) {
+    const id = `playlist_activity-${nanoid(16)}`;
+    const time = new Date().toISOString();
+
+    const query = {
+      text: `INSERT INTO playlist_activity
+      VALUES($1, $2, $3, $4, $5, $6)
+      RETURNING id`,
+      values: [id, playlistId, userId, songId, time, action],
+    };
+
+    const result = await this._pool.query(query);
+
+    if (result.rowCount === 0) {
+      throw new InvariantError('Playlist activity was not added');
+    }
+
+    return result.rows[0].id;
+  }
+
+  async getPlaylistActivities(playlistId) {
+    const query = {
+      text: `SELECT users.username, songs.title, playlist_activity.action,
+      playlist_activity.time FROM playlist_activity
+      LEFT JOIN users ON playlist_activity.user_id = users.id
+      LEFT JOIN songs ON playlist_activity.song_id = songs.id
+      WHERE playlist_activity.playlist_id = $1
+      ORDER BY playlist_activity.time ASC`,
+      values: [playlistId],
+    };
+
+    const activities = await this._pool.query(query);
+
+    if (activities.rowCount === 0) {
+      throw new NotFoundError('Playlist activities not found');
+    }
+
+    return activities.rows;
+  }
 }
 
 module.exports = PlaylistsService;
