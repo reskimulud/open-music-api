@@ -1,5 +1,7 @@
+const {nanoid} = require('nanoid');
 const {Pool} = require('pg');
 const InvariantError = require('../exceptions/InvariantError');
+const NotFoundError = require('../exceptions/NotFoundError');
 
 class CollaborationsService {
   constructor() {
@@ -9,8 +11,19 @@ class CollaborationsService {
   async addCollaboration(playlistId, userId) {
     const id = `collaboration-${nanoid(16)}`;
 
+    const queryUser = {
+      text: 'SELECT * FROM users WHERE id = $1',
+      values: [userId],
+    };
+
+    const user = await this._pool.query(queryUser);
+
+    if (user.rowCount === 0) {
+      throw new NotFoundError('User not found');
+    }
+
     const query = {
-      text: 'INSERT INTO collaborations VALUES($1, $2, $3) RETURNONG id',
+      text: 'INSERT INTO collaborations VALUES($1, $2, $3) RETURNING id',
       values: [id, playlistId, userId],
     };
 
@@ -37,11 +50,11 @@ class CollaborationsService {
     }
   }
 
-  async verifyColaborator(noteId, userId) {
+  async verifyCollaborator(playlistId, userId) {
     const query = {
       // eslint-disable-next-line max-len
       text: 'SELECT * FROM collaborations WHERE playlist_id = $1 AND user_id = $2',
-      values: [noteId, userId],
+      values: [playlistId, userId],
     };
 
     const result = await this._pool.query(query);

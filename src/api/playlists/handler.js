@@ -50,7 +50,7 @@ class PlaylistsHandler {
         message: 'Internal Server Error',
       });
       response.code(500);
-      console.error(err);
+      console.error('post playlist :', err);
       return response;
     }
   }
@@ -62,7 +62,7 @@ class PlaylistsHandler {
       const {songId} = request.payload;
 
       const {id: credentialId} = request.auth.credentials;
-      await this._service.verifyPlaylistOwner(playlistId, credentialId);
+      await this._service.verifyPlaylistAccess(playlistId, credentialId);
 
       const songlistId = await this._service.addSonglist(playlistId, songId);
 
@@ -97,7 +97,7 @@ class PlaylistsHandler {
         message: 'Internal Server Error',
       });
       response.code(500);
-      console.error(err);
+      console.error('post playlist song :', err);
       return response;
     }
   }
@@ -128,7 +128,7 @@ class PlaylistsHandler {
         message: 'Internal Server Error',
       });
       response.code(500);
-      console.error(err);
+      console.error('get playlist :', err);
       return response;
     }
   }
@@ -138,7 +138,7 @@ class PlaylistsHandler {
       const {id} = request.params;
       const {id: credentialId} = request.auth.credentials;
 
-      await this._service.verifyPlaylistOwner(id, credentialId);
+      await this._service.verifyPlaylistAccess(id, credentialId);
       const playlist = await this._service.getPlaylistById(id);
       return {
         status: 'success',
@@ -162,7 +162,7 @@ class PlaylistsHandler {
         message: 'Internal Server Error',
       });
       response.code(500);
-      console.error(err);
+      console.error('get playlist by id :', err);
       return response;
     }
   }
@@ -172,7 +172,7 @@ class PlaylistsHandler {
       const {id: playlistId} = request.params;
       const {id: credentialId} = request.auth.credentials;
 
-      await this._service.verifyPlaylistOwner(playlistId, credentialId);
+      await this._service.verifyPlaylistAccess(playlistId, credentialId);
       const activities = await this._service.getPlaylistActivities(playlistId);
 
       return {
@@ -198,7 +198,7 @@ class PlaylistsHandler {
         message: 'Internal Server Error',
       });
       response.code(500);
-      console.error(err);
+      console.error('get playlist activity :', err);
       return response;
     }
   }
@@ -230,7 +230,7 @@ class PlaylistsHandler {
         message: 'Internal Server Error',
       });
       response.code(500);
-      console.error(err);
+      console.error('delete playlist by id :', err);
       return response;
     }
   }
@@ -242,7 +242,7 @@ class PlaylistsHandler {
       const {songId} = request.payload;
       const {id: credentialId} = request.auth.credentials;
 
-      await this._service.verifyPlaylistOwner(playlistId, credentialId);
+      await this._service.verifyPlaylistAccess(playlistId, credentialId);
       await this._service.deleteSonglistByPlaylistAndSongId(playlistId, songId);
       await this._service.addPlaylistActivity(
           playlistId,
@@ -270,7 +270,7 @@ class PlaylistsHandler {
         message: 'Internal Server Error',
       });
       response.code(500);
-      console.error(err);
+      console.error('delete playlist song :', err);
       return response;
     }
   }
