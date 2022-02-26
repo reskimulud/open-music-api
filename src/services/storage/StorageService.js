@@ -13,6 +13,11 @@ class StorageService {
     const filename = +new Date() + meta.filename;
     const path = `${this._folder}/${filename}`;
 
+    const oldFile = fs.readFileSync(path);
+    if (oldFile) {
+      this.deleteFile(filename);
+    }
+
     const fileStream = fs.createWriteStream(path);
 
     return new Promise((resolve, reject) => {
@@ -20,6 +25,10 @@ class StorageService {
       file.pipe(fileStream);
       file.on('end', () => resolve(filename));
     });
+  }
+
+  deleteFile(filename) {
+    fs.unlinkSync(`${this._folder}/${filename}`);
   }
 }
 

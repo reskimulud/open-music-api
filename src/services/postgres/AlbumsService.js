@@ -80,6 +80,19 @@ class AlbumsService {
       throw new NotFoundError('Error deleting album');
     }
   }
+
+  async addAlbumCoverById(id, coverUrl) {
+    const query = {
+      text: 'UPDATE albums SET cover = $1 WHERE id = $2',
+      values: [coverUrl, id],
+    };
+
+    const result = await this._pool.query(query);
+
+    if (!result.rowCount) {
+      throw new NotFoundError('Error adding album cover');
+    }
+  }
 }
 
 module.exports = AlbumsService;
