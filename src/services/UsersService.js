@@ -20,7 +20,7 @@ class UsersService {
 
     const result = await this._pool.query(query);
 
-    if (result.rowCount === 0) {
+    if (!result.rowCount) {
       throw new InvariantError('User was not added');
     }
 
@@ -48,7 +48,7 @@ class UsersService {
 
     const result = await this._pool.query(query);
 
-    if (result.rowCount === 0) {
+    if (!result.rowCount) {
       throw new InvariantError('User was not found');
     }
 
@@ -63,7 +63,7 @@ class UsersService {
 
     const result = await this._pool.query(query);
 
-    if (result.rowCount === 0) {
+    if (!result.rowCount) {
       throw new AuthenticationError('User was not found');
     }
 

@@ -17,6 +17,7 @@
         "indent": 2,
         "no-unused-vars": "warn",
         "no-underscore-dangle": "off",
-        "require-jsdoc": "off"
+        "require-jsdoc": "off",
+        "max-len": "off"
     }
 }

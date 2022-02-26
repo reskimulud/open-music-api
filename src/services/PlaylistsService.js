@@ -19,7 +19,7 @@ class PlaylistsService {
 
     const result = await this._pool.query(query);
 
-    if (result.rowCount === 0) {
+    if (!result.rowCount) {
       throw new InvariantError('Playlist was not added');
     }
 
@@ -36,7 +36,7 @@ class PlaylistsService {
 
     const playlist = await this._pool.query(queryPlaylist);
 
-    if (playlist.rowCount === 0) {
+    if (!playlist.rowCount) {
       throw new NotFoundError('Playlist not found');
     }
 
@@ -47,7 +47,7 @@ class PlaylistsService {
 
     const song = await this._pool.query(querySong);
 
-    if (song.rowCount === 0) {
+    if (!song.rowCount) {
       throw new NotFoundError('Song not found');
     }
 
@@ -58,7 +58,7 @@ class PlaylistsService {
 
     const result = await this._pool.query(query);
 
-    if (result.rowCount === 0) {
+    if (!result.rowCount) {
       throw new InvariantError('Songlist was not added');
     }
 
@@ -88,7 +88,7 @@ class PlaylistsService {
 
     const playlist = await this._pool.query(queryPlaylist);
 
-    if (playlist.rowCount === 0) {
+    if (!playlist.rowCount) {
       throw new NotFoundError('Playlist not found');
     }
 
@@ -102,11 +102,10 @@ class PlaylistsService {
 
     const songs = await this._pool.query(querySongs);
 
-    const result = {
+    return {
       ...playlist.rows[0],
       songs: songs.rows,
     };
-    return result;
   }
 
   async deletePlaylistById(id) {
@@ -117,7 +116,7 @@ class PlaylistsService {
 
     const result = await this._pool.query(query);
 
-    if (result.rowCount === 0) {
+    if (!result.rowCount) {
       throw new NotFoundError('Playlist not found');
     }
   }
@@ -130,7 +129,7 @@ class PlaylistsService {
 
     const result = await this._pool.query(query);
 
-    if (result.rowCount === 0) {
+    if (!result.rowCount) {
       throw new NotFoundError('Song not found');
     }
   }
@@ -144,7 +143,7 @@ class PlaylistsService {
     const result = await this._pool.query(query);
 
 
-    if (result.rowCount === 0) {
+    if (!result.rowCount) {
       throw new NotFoundError('Playlist not found');
     }
 
@@ -162,7 +161,6 @@ class PlaylistsService {
       }
 
       try {
-        // eslint-disable-next-line max-len
         await this._collaborationsService.verifyCollaborator(playlistId, userId);
       } catch {
         throw err;
@@ -183,7 +181,7 @@ class PlaylistsService {
 
     const result = await this._pool.query(query);
 
-    if (result.rowCount === 0) {
+    if (!result.rowCount) {
       throw new InvariantError('Playlist activity was not added');
     }
 
@@ -203,7 +201,7 @@ class PlaylistsService {
 
     const activities = await this._pool.query(query);
 
-    if (activities.rowCount === 0) {
+    if (!activities.rowCount) {
       throw new NotFoundError('Playlist activities not found');
     }
 

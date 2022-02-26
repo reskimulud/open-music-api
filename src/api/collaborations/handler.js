@@ -1,4 +1,3 @@
-/* eslint-disable max-len */
 class CollaborationsHandler {
   constructor(collaborationsService, playlistsService, validator) {
     this._collaborationsService = collaborationsService;

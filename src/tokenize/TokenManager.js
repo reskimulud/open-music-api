@@ -1,4 +1,3 @@
-/* eslint-disable max-len */
 const Jwt = require('@hapi/jwt');
 const InvariantError = require('../exceptions/InvariantError');
 

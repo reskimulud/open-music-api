@@ -18,7 +18,7 @@ class CollaborationsService {
 
     const user = await this._pool.query(queryUser);
 
-    if (user.rowCount === 0) {
+    if (!user.rowCount) {
       throw new NotFoundError('User not found');
     }
 
@@ -29,7 +29,7 @@ class CollaborationsService {
 
     const result = await this._pool.query(query);
 
-    if (result.rowCount === 0) {
+    if (!result.rowCount) {
       throw new InvariantError('Collaboration was not added');
     }
 
@@ -38,28 +38,26 @@ class CollaborationsService {
 
   async deleteCollaboration(playlistId, userId) {
     const query = {
-      // eslint-disable-next-line max-len
       text: 'DELETE FROM collaborations WHERE playlist_id = $1 AND user_id = $2 RETURNING id',
       values: [playlistId, userId],
     };
 
     const result = await this._pool.query(query);
 
-    if (result.rowCount === 0) {
+    if (!result.rowCount) {
       throw new InvariantError('Collaboration was not deleted');
     }
   }
 
   async verifyCollaborator(playlistId, userId) {
     const query = {
-      // eslint-disable-next-line max-len
       text: 'SELECT * FROM collaborations WHERE playlist_id = $1 AND user_id = $2',
       values: [playlistId, userId],
     };
 
     const result = await this._pool.query(query);
 
-    if (result.rowCount === 0) {
+    if (!result.rowCount) {
       throw new InvariantError('User is not a collaborator');
     }
   }

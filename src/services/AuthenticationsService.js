@@ -14,7 +14,7 @@ class AuthenticationsService {
 
     const result = await this._pool.query(query);
 
-    if (result.rowCount === 0) {
+    if (!result.rowCount) {
       throw new InvariantError('Refresh token was not added');
     }
   }
@@ -27,7 +27,7 @@ class AuthenticationsService {
 
     const result = await this._pool.query(query);
 
-    if (result.rowCount === 0) {
+    if (!result.rowCount) {
       throw new InvariantError('Refresh token was not valid');
     }
   }
@@ -40,7 +40,7 @@ class AuthenticationsService {
 
     const result = await this._pool.query(query);
 
-    if (result.rowCount === 0) {
+    if (!result.rowCount) {
       throw new InvariantError('Refresh token was not deleted');
     }
   }

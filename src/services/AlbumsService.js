@@ -1,4 +1,3 @@
-/* eslint-disable max-len */
 const {Pool} = require('pg');
 const {nanoid} = require('nanoid');
 const NotFoundError = require('../exceptions/NotFoundError');
@@ -10,7 +9,7 @@ class AlbumsService {
   }
 
   async addAlbums({name, year}) {
-    const id = 'album-' + nanoid(16);
+    const id = `album-${nanoid(16)}`;
 
     const query = {
       text: 'INSERT INTO albums (id, name, year) VALUES ($1, $2, $3) RETURNING id',
@@ -18,7 +17,7 @@ class AlbumsService {
     };
     const result = await this._pool.query(query);
 
-    if (result.rowCount === 0) {
+    if (!result.rowCount) {
       throw new InvariantError('Error adding album');
     }
 
@@ -45,7 +44,7 @@ class AlbumsService {
 
     const songs = await this._pool.query(querySongs);
 
-    if (result.rowCount === 0) {
+    if (!result.rowCount) {
       throw new NotFoundError('Album not found');
     }
 
@@ -63,7 +62,7 @@ class AlbumsService {
 
     const result = await this._pool.query(query);
 
-    if (result.rowCount === 0) {
+    if (!result.rowCount) {
       throw new NotFoundError('Error editing album');
     }
   }
@@ -76,7 +75,7 @@ class AlbumsService {
 
     const result = await this._pool.query(query);
 
-    if (result.rowCount === 0) {
+    if (!result.rowCount) {
       throw new NotFoundError('Error deleting album');
     }
   }

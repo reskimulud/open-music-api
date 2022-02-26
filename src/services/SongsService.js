@@ -13,13 +13,12 @@ class SongsService {
     const id = 'song-' + nanoid(16);
 
     const query = {
-      // eslint-disable-next-line max-len
       text: 'INSERT INTO songs (id, title, year, genre, performer, duration, album_id) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id',
       values: [id, title, year, genre, performer, duration, albumId],
     };
     const result = await this._pool.query(query);
 
-    if (result.rowCount === 0) {
+    if (!result.rowCount) {
       throw new InvariantError('Error adding song');
     }
 
@@ -30,15 +29,14 @@ class SongsService {
     let query;
 
     if (title !== undefined && performer !== undefined) {
-      // eslint-disable-next-line max-len
-      query = `SELECT * FROM songs WHERE title ILIKE '%${title}%' AND performer ILIKE '%${performer}%'`;
+      query = `SELECT id, title, performer FROM songs WHERE title ILIKE '%${title}%' AND performer ILIKE '%${performer}%'`;
     } else if (title !== undefined) {
-      query = `SELECT * FROM songs WHERE title ILIKE '%${title}%'`;
+      query = `SELECT id, title, performer FROM songs WHERE title ILIKE '%${title}%'`;
     } else if (performer !== undefined) {
-      query = `SELECT * FROM songs WHERE performer ILIKE '%${performer}%'`;
+      query = `SELECT id, title, performer FROM songs WHERE performer ILIKE '%${performer}%'`;
     } else {
       query = {
-        text: 'SELECT * FROM songs',
+        text: 'SELECT id, title, performer FROM songs',
       };
     }
 
@@ -54,7 +52,7 @@ class SongsService {
 
     const result = await this._pool.query(query);
 
-    if (result.rowCount === 0) {
+    if (!result.rowCount) {
       throw new NotFoundError('Song not found');
     }
 
@@ -63,14 +61,13 @@ class SongsService {
 
   async updateSongById(id, {title, year, genre, performer, duration, albumId}) {
     const query = {
-      // eslint-disable-next-line max-len
       text: 'UPDATE songs SET title = $1, year = $2, genre = $3, performer = $4, duration = $5, album_id = $6 WHERE id = $7',
       values: [title, year, genre, performer, duration, albumId, id],
     };
 
     const result = await this._pool.query(query);
 
-    if (result.rowCount === 0) {
+    if (!result.rowCount) {
       throw new NotFoundError('Error editing song');
     }
   }
@@ -83,7 +80,7 @@ class SongsService {
 
     const result = await this._pool.query(query);
 
-    if (result.rowCount === 0) {
+    if (!result.rowCount) {
       throw new NotFoundError('Error deleting song');
     }
   }
