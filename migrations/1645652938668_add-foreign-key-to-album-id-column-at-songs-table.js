@@ -1,7 +1,5 @@
 /* eslint-disable camelcase */
 
-exports.shorthands = undefined;
-
 exports.up = (pgm) => {
   // add foreign key to album_id column at songs table
   pgm.addConstraint(
