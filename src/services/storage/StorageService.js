@@ -9,14 +9,11 @@ class StorageService {
     }
   }
 
-  writeFile(file, meta) {
-    const filename = +new Date() + meta.filename;
-    const path = `${this._folder}/${filename}`;
+  writeFile(file, meta, albumId) {
+    const fileExt = meta.filename.split('.').pop();
 
-    const oldFile = fs.readFileSync(path);
-    if (oldFile) {
-      this.deleteFile(filename);
-    }
+    const filename = `${albumId}.${fileExt}`;
+    const path = `${this._folder}/${filename}`;
 
     const fileStream = fs.createWriteStream(path);
 
