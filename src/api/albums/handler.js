@@ -8,6 +8,8 @@ class AlbumsHandler {
     this.getAlbumByIdHandler = this.getAlbumByIdHandler.bind(this);
     this.putAlbumByIdHandler = this.putAlbumByIdHandler.bind(this);
     this.deleteAlbumByIdHandler = this.deleteAlbumByIdHandler.bind(this);
+    this.postAlbumLikeByIdHandler = this.postAlbumLikeByIdHandler.bind(this);
+    this.getAlbumLikesByIdHandler = this.getAlbumLikesByIdHandler.bind(this);
   }
 
   async postAlbumHandler(request, h) {
@@ -71,6 +73,34 @@ class AlbumsHandler {
     return {
       status: 'success',
       message: 'Album deleted',
+    };
+  }
+
+  async postAlbumLikeByIdHandler(request, h) {
+    const {id} = request.params;
+    const {id: userId} = request.auth.credentials;
+
+    const message = await this._service.toggleAlbumLikeById(id, userId);
+
+    const response = h.response({
+      status: 'success',
+      message,
+    });
+    response.code(201);
+    return response;
+  }
+
+  async getAlbumLikesByIdHandler(request) {
+    const {id} = request.params;
+
+    const likes = await this._service.getAlbumLikesById(id);
+
+    return {
+      status: 'success',
+      message: 'Album likes fetched',
+      data: {
+        likes,
+      },
     };
   }
 }
