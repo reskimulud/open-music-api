@@ -175,6 +175,10 @@ class AlbumsService {
       };
 
       const result = await this._pool.query(query);
+
+      // sudah menambahkan parameter ke 3 (expirationInSecond) dengan value 1800 (30 menit)
+      // untuk menimpa default parameter yang ada di method CacheService.set()
+      // https://github.com/reskimulud/open-music-api/commit/aac8df953bc0540172098c0f67635ae8210d5710
       this._cacheService.set(`albumLikes:${id}`, JSON.stringify(result.rowCount), 1800);
       return {
         likes: result.rowCount,
