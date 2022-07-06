@@ -1,2 +1,2 @@
-web:npm run migrate up
-web:npm start
+web: npm run migrate up
+web: npm start
