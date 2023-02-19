@@ -1,11 +1,12 @@
 const {nanoid} = require('nanoid');
-const {Pool} = require('pg');
 const InvariantError = require('../../exceptions/InvariantError');
 const NotFoundError = require('../../exceptions/NotFoundError');
 
 class CollaborationsService {
-  constructor() {
-    this._pool = new Pool();
+  #pool;
+
+  constructor(pool) {
+    this.#pool = pool;
   }
 
   async addCollaboration(playlistId, userId) {
@@ -16,7 +17,7 @@ class CollaborationsService {
       values: [userId],
     };
 
-    const user = await this._pool.query(queryUser);
+    const user = await this.#pool.query(queryUser);
 
     if (!user.rowCount) {
       throw new NotFoundError('User not found');
@@ -27,7 +28,7 @@ class CollaborationsService {
       values: [id, playlistId, userId],
     };
 
-    const result = await this._pool.query(query);
+    const result = await this.#pool.query(query);
 
     if (!result.rowCount) {
       throw new InvariantError('Collaboration was not added');
@@ -42,7 +43,7 @@ class CollaborationsService {
       values: [playlistId, userId],
     };
 
-    const result = await this._pool.query(query);
+    const result = await this.#pool.query(query);
 
     if (!result.rowCount) {
       throw new InvariantError('Collaboration was not deleted');
@@ -55,7 +56,7 @@ class CollaborationsService {
       values: [playlistId, userId],
     };
 
-    const result = await this._pool.query(query);
+    const result = await this.#pool.query(query);
 
     if (!result.rowCount) {
       throw new InvariantError('User is not a collaborator');

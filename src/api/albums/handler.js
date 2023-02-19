@@ -1,7 +1,10 @@
 class AlbumsHandler {
+  #service;
+  #validator;
+
   constructor(service, validator) {
-    this._service = service;
-    this._validator = validator;
+    this.#service = service;
+    this.#validator = validator;
 
     this.postAlbumHandler = this.postAlbumHandler.bind(this);
     this.getAlbumsHandler = this.getAlbumsHandler.bind(this);
@@ -13,9 +16,9 @@ class AlbumsHandler {
   }
 
   async postAlbumHandler(request, h) {
-    this._validator.validateAlbumPayload(request.payload);
+    this.#validator.validateAlbumPayload(request.payload);
 
-    const albumId = await this._service.addAlbums(request.payload);
+    const albumId = await this.#service.addAlbums(request.payload);
 
     const response = h.response({
       status: 'success',
@@ -29,7 +32,7 @@ class AlbumsHandler {
   }
 
   async getAlbumsHandler() {
-    const albums = await this._service.getAlbums();
+    const albums = await this.#service.getAlbums();
 
     return {
       status: 'success',
@@ -42,7 +45,7 @@ class AlbumsHandler {
 
   async getAlbumByIdHandler(request, h) {
     const {id} = request.params;
-    const album = await this._service.getAlbumById(id);
+    const album = await this.#service.getAlbumById(id);
 
     return {
       status: 'success',
@@ -54,10 +57,10 @@ class AlbumsHandler {
   }
 
   async putAlbumByIdHandler(request) {
-    this._validator.validateAlbumPayload(request.payload);
+    this.#validator.validateAlbumPayload(request.payload);
     const {id} = request.params;
 
-    await this._service.updateAlbumById(id, request.payload);
+    await this.#service.updateAlbumById(id, request.payload);
 
     return {
       status: 'success',
@@ -68,7 +71,7 @@ class AlbumsHandler {
   async deleteAlbumByIdHandler(request, h) {
     const {id} = request.params;
 
-    await this._service.deleteAlbumById(id);
+    await this.#service.deleteAlbumById(id);
 
     return {
       status: 'success',
@@ -80,7 +83,7 @@ class AlbumsHandler {
     const {id} = request.params;
     const {id: userId} = request.auth.credentials;
 
-    const message = await this._service.toggleAlbumLikeById(id, userId);
+    const message = await this.#service.toggleAlbumLikeById(id, userId);
 
     const response = h.response({
       status: 'success',
@@ -93,7 +96,7 @@ class AlbumsHandler {
   async getAlbumLikesByIdHandler(request, h) {
     const {id} = request.params;
 
-    const {likes, source} = await this._service.getAlbumLikesById(id);
+    const {likes, source} = await this.#service.getAlbumLikesById(id);
 
     if (source === 'cache') {
       const response = h.response({

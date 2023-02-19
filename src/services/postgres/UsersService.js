@@ -1,12 +1,13 @@
 const {nanoid} = require('nanoid');
-const {Pool} = require('pg');
 const InvariantError = require('../../exceptions/InvariantError');
 const bcrypt = require('bcrypt');
 const AuthenticationError = require('../../exceptions/AuthenticationError');
 
 class UsersService {
-  constructor() {
-    this._pool = new Pool();
+  #pool;
+
+  constructor(pool) {
+    this.#pool = pool;
   }
 
   async addUser({username, password, fullname}) {
@@ -18,7 +19,7 @@ class UsersService {
       values: [id, username, hashedPassword, fullname],
     };
 
-    const result = await this._pool.query(query);
+    const result = await this.#pool.query(query);
 
     if (!result.rowCount) {
       throw new InvariantError('User was not added');
@@ -33,7 +34,7 @@ class UsersService {
       values: [username],
     };
 
-    const result = await this._pool.query(query);
+    const result = await this.#pool.query(query);
 
     if (result.rowCount > 0) {
       throw new InvariantError('User was not added, username has been used');
@@ -46,7 +47,7 @@ class UsersService {
       values: [id],
     };
 
-    const result = await this._pool.query(query);
+    const result = await this.#pool.query(query);
 
     if (!result.rowCount) {
       throw new InvariantError('User was not found');
@@ -61,7 +62,7 @@ class UsersService {
       values: [username],
     };
 
-    const result = await this._pool.query(query);
+    const result = await this.#pool.query(query);
 
     if (!result.rowCount) {
       throw new AuthenticationError('User was not found');

@@ -1,12 +1,13 @@
 const {nanoid} = require('nanoid');
-const {Pool} = require('pg');
 const InvariantError = require('../../exceptions/InvariantError');
 const NotFoundError = require('../../exceptions/NotFoundError');
 const {mapDBSongToModel, mapDBDetailSongToModel} = require('../../utils');
 
 class SongsService {
-  constructor() {
-    this._pool = new Pool();
+  #pool;
+
+  constructor(pool) {
+    this.#pool = pool;
   }
 
   async addSongs({title, year, genre, performer, duration, albumId}) {
@@ -16,7 +17,7 @@ class SongsService {
       text: 'INSERT INTO songs (id, title, year, genre, performer, duration, album_id) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id',
       values: [id, title, year, genre, performer, duration, albumId],
     };
-    const result = await this._pool.query(query);
+    const result = await this.#pool.query(query);
 
     if (!result.rowCount) {
       throw new InvariantError('Error adding song');
@@ -40,7 +41,7 @@ class SongsService {
       };
     }
 
-    const result = await this._pool.query(query);
+    const result = await this.#pool.query(query);
     return result.rows.map(mapDBSongToModel);
   }
 
@@ -50,7 +51,7 @@ class SongsService {
       values: [id],
     };
 
-    const result = await this._pool.query(query);
+    const result = await this.#pool.query(query);
 
     if (!result.rowCount) {
       throw new NotFoundError('Song not found');
@@ -65,7 +66,7 @@ class SongsService {
       values: [title, year, genre, performer, duration, albumId, id],
     };
 
-    const result = await this._pool.query(query);
+    const result = await this.#pool.query(query);
 
     if (!result.rowCount) {
       throw new NotFoundError('Error editing song');
@@ -78,7 +79,7 @@ class SongsService {
       values: [id],
     };
 
-    const result = await this._pool.query(query);
+    const result = await this.#pool.query(query);
 
     if (!result.rowCount) {
       throw new NotFoundError('Error deleting song');

@@ -1,17 +1,20 @@
 class UsersHandler {
+  #service;
+  #validator;
+
   constructor(service, validator) {
-    this._service = service;
-    this._validator = validator;
+    this.#service = service;
+    this.#validator = validator;
 
     this.postUserHandler = this.postUserHandler.bind(this);
     this.getUserByIdHandler = this.getUserByIdHandler.bind(this);
   }
 
   async postUserHandler(request, h) {
-    this._validator.validateUserPayload(request.payload);
+    this.#validator.validateUserPayload(request.payload);
     const {username, password, fullname} = request.payload;
 
-    const userId = await this._service.addUser({
+    const userId = await this.#service.addUser({
       username,
       password,
       fullname});
@@ -29,7 +32,7 @@ class UsersHandler {
 
   async getUserByIdHandler(request, h) {
     const {id} = request.params;
-    const user = await this._service.getUserById(id);
+    const user = await this.#service.getUserById(id);
 
     return {
       status: 'success',

@@ -1,8 +1,10 @@
 const fs = require('fs');
 
 class StorageService {
+  #folder;
+
   constructor(folder) {
-    this._folder = folder;
+    this.#folder = folder;
 
     if (!fs.existsSync(folder)) {
       fs.mkdirSync(folder, {recursive: true});
@@ -13,7 +15,7 @@ class StorageService {
     const fileExt = meta.filename.split('.').pop();
 
     const filename = `${albumId}.${fileExt}`;
-    const path = `${this._folder}/${filename}`;
+    const path = `${this.#folder}/${filename}`;
 
     const fileStream = fs.createWriteStream(path);
 
@@ -25,7 +27,7 @@ class StorageService {
   }
 
   deleteFile(filename) {
-    fs.unlinkSync(`${this._folder}/${filename}`);
+    fs.unlinkSync(`${this.#folder}/${filename}`);
   }
 }
 

@@ -1,13 +1,15 @@
-const {Pool} = require('pg');
 const {nanoid} = require('nanoid');
 const NotFoundError = require('../../exceptions/NotFoundError');
 const InvariantError = require('../../exceptions/InvariantError');
 const {mapDBAlbumsToModel} = require('../../utils');
 
 class AlbumsService {
-  constructor(cacheService) {
-    this._pool = new Pool();
-    this._cacheService = cacheService;
+  #pool;
+  #cacheService;
+
+  constructor(pool, cacheService) {
+    this.#pool = pool;
+    this.#cacheService = cacheService;
   }
 
   async addAlbums({name, year}) {
@@ -17,7 +19,7 @@ class AlbumsService {
       text: 'INSERT INTO albums (id, name, year) VALUES ($1, $2, $3) RETURNING id',
       values: [id, name, year],
     };
-    const result = await this._pool.query(query);
+    const result = await this.#pool.query(query);
 
     if (!result.rowCount) {
       throw new InvariantError('Error adding album');
@@ -27,7 +29,7 @@ class AlbumsService {
   }
 
   async getAlbums() {
-    const result = await this._pool.query('SELECT * FROM albums');
+    const result = await this.#pool.query('SELECT * FROM albums');
     return result.rows.map(mapDBAlbumsToModel);
   }
 
@@ -37,14 +39,14 @@ class AlbumsService {
       values: [id],
     };
 
-    const result = await this._pool.query(query);
+    const result = await this.#pool.query(query);
 
     const querySongs = {
       text: 'SELECT id, title, performer FROM songs WHERE album_id = $1',
       values: [id],
     };
 
-    const songs = await this._pool.query(querySongs);
+    const songs = await this.#pool.query(querySongs);
 
     if (!result.rowCount) {
       throw new NotFoundError('Album not found');
@@ -62,7 +64,7 @@ class AlbumsService {
       values: [name, year, id],
     };
 
-    const result = await this._pool.query(query);
+    const result = await this.#pool.query(query);
 
     if (!result.rowCount) {
       throw new NotFoundError('Error editing album');
@@ -75,7 +77,7 @@ class AlbumsService {
       values: [id],
     };
 
-    const result = await this._pool.query(query);
+    const result = await this.#pool.query(query);
 
     if (!result.rowCount) {
       throw new NotFoundError('Error deleting album');
@@ -88,7 +90,7 @@ class AlbumsService {
       values: [coverUrl, id],
     };
 
-    const result = await this._pool.query(query);
+    const result = await this.#pool.query(query);
 
     if (!result.rowCount) {
       throw new NotFoundError('Error adding album cover');
@@ -102,7 +104,7 @@ class AlbumsService {
       values: [id, userId, albumId],
     };
 
-    const result = await this._pool.query(query);
+    const result = await this.#pool.query(query);
 
     if (!result.rowCount) {
       throw new InvariantError('Error adding album like');
@@ -115,7 +117,7 @@ class AlbumsService {
       values: [id, userId],
     };
 
-    const result = await this._pool.query(query);
+    const result = await this.#pool.query(query);
 
     if (!result.rowCount) {
       throw new NotFoundError('Error deleting album like');
@@ -128,7 +130,7 @@ class AlbumsService {
       values: [id],
     };
 
-    const album = await this._pool.query(queryAlbum);
+    const album = await this.#pool.query(queryAlbum);
 
     if (!album.rowCount) {
       throw new NotFoundError('Album not found');
@@ -139,8 +141,8 @@ class AlbumsService {
       values: [userId, id],
     };
 
-    const userLike = await this._pool.query(queryUserLike);
-    this._cacheService.delete(`albumLikes:${id}`);
+    const userLike = await this.#pool.query(queryUserLike);
+    this.#cacheService.delete(`albumLikes:${id}`);
 
     if (userLike.rowCount) {
       try {
@@ -163,7 +165,7 @@ class AlbumsService {
 
   async getAlbumLikesById(id) {
     try {
-      const result = await this._cacheService.get(`albumLikes:${id}`);
+      const result = await this.#cacheService.get(`albumLikes:${id}`);
       return {
         likes: JSON.parse(result),
         source: 'cache',
@@ -174,12 +176,12 @@ class AlbumsService {
         values: [id],
       };
 
-      const result = await this._pool.query(query);
+      const result = await this.#pool.query(query);
 
       // sudah menambahkan parameter ke 3 (expirationInSecond) dengan value 1800 (30 menit)
       // untuk menimpa default parameter yang ada di method CacheService.set()
       // https://github.com/reskimulud/open-music-api/commit/aac8df953bc0540172098c0f67635ae8210d5710
-      this._cacheService.set(`albumLikes:${id}`, JSON.stringify(result.rowCount), 1800);
+      this.#cacheService.set(`albumLikes:${id}`, JSON.stringify(result.rowCount), 1800);
       return {
         likes: result.rowCount,
         source: 'database',

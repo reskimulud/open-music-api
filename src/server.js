@@ -50,15 +50,19 @@ const UploadsValidator = require('./validator/uploads');
 // cache (redis)
 const CacheService = require('./services/redis/CacheService');
 
+// database (postgres)
+const {Pool} = require('pg');
+
 
 const init = async () => {
+  const pool = new Pool();
   const cacheService = new CacheService();
-  const albumsService = new AlbumsService(cacheService);
-  const songsService = new SongsService();
-  const usersService = new UsersService();
-  const authenticationsService = new AuthenticationsService();
-  const collaborationsService = new CollaborationsService();
-  const playlistsService = new PlaylistsService(collaborationsService);
+  const albumsService = new AlbumsService(pool, cacheService);
+  const songsService = new SongsService(pool);
+  const usersService = new UsersService(pool);
+  const authenticationsService = new AuthenticationsService(pool);
+  const collaborationsService = new CollaborationsService(pool);
+  const playlistsService = new PlaylistsService(pool, collaborationsService);
   const storageService = new StorageService(path.resolve(__dirname, 'api/albums/cover'));
 
   const server = Hapi.server({

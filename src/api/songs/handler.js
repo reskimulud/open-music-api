@@ -1,7 +1,10 @@
 class SongsHandler {
+  #service;
+  #validator;
+
   constructor(service, validator) {
-    this._service = service;
-    this._validator = validator;
+    this.#service = service;
+    this.#validator = validator;
 
     this.postSongHandler = this.postSongHandler.bind(this);
     this.getSongsHandler = this.getSongsHandler.bind(this);
@@ -11,9 +14,9 @@ class SongsHandler {
   }
 
   async postSongHandler(request, h) {
-    this._validator.validateSongPayload(request.payload);
+    this.#validator.validateSongPayload(request.payload);
 
-    const songId = await this._service.addSongs(request.payload);
+    const songId = await this.#service.addSongs(request.payload);
 
     const response = h.response({
       status: 'success',
@@ -27,7 +30,7 @@ class SongsHandler {
   }
 
   async getSongsHandler(request) {
-    const songs = await this._service.getSongs(request.query);
+    const songs = await this.#service.getSongs(request.query);
 
     return {
       status: 'success',
@@ -41,7 +44,7 @@ class SongsHandler {
   async getSongByIdHandler(request, h) {
     const {id} = request.params;
 
-    const song = await this._service.getSongById(id);
+    const song = await this.#service.getSongById(id);
 
     return {
       status: 'success',
@@ -54,9 +57,9 @@ class SongsHandler {
 
   async putSongByIdHandler(request, h) {
     const {id} = request.params;
-    this._validator.validateSongPayload(request.payload);
+    this.#validator.validateSongPayload(request.payload);
 
-    await this._service.updateSongById(id, request.payload);
+    await this.#service.updateSongById(id, request.payload);
 
     return {
       status: 'success',
@@ -67,7 +70,7 @@ class SongsHandler {
   async deleteSongByIdHandler(request, h) {
     const {id} = request.params;
 
-    await this._service.deleteSongById(id);
+    await this.#service.deleteSongById(id);
 
     const response = h.response({
       status: 'success',

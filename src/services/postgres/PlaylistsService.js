@@ -1,13 +1,15 @@
 const {nanoid} = require('nanoid');
-const {Pool} = require('pg');
 const AuthorizationError = require('../../exceptions/AuthorizationError');
 const InvariantError = require('../../exceptions/InvariantError');
 const NotFoundError = require('../../exceptions/NotFoundError');
 
 class PlaylistsService {
-  constructor(collaborationsService) {
-    this._pool = new Pool();
-    this._collaborationsService = collaborationsService;
+  #pool;
+  #collaborationsService;
+
+  constructor(pool, collaborationsService) {
+    this.#pool = pool;
+    this.#collaborationsService = collaborationsService;
   }
 
   async addPlaylist({name, owner}) {
@@ -17,7 +19,7 @@ class PlaylistsService {
       values: [id, name, owner],
     };
 
-    const result = await this._pool.query(query);
+    const result = await this.#pool.query(query);
 
     if (!result.rowCount) {
       throw new InvariantError('Playlist was not added');
@@ -34,7 +36,7 @@ class PlaylistsService {
       values: [playlistId],
     };
 
-    const playlist = await this._pool.query(queryPlaylist);
+    const playlist = await this.#pool.query(queryPlaylist);
 
     if (!playlist.rowCount) {
       throw new NotFoundError('Playlist not found');
@@ -45,7 +47,7 @@ class PlaylistsService {
       values: [songId],
     };
 
-    const song = await this._pool.query(querySong);
+    const song = await this.#pool.query(querySong);
 
     if (!song.rowCount) {
       throw new NotFoundError('Song not found');
@@ -56,7 +58,7 @@ class PlaylistsService {
       values: [id, playlistId, songId],
     };
 
-    const result = await this._pool.query(query);
+    const result = await this.#pool.query(query);
 
     if (!result.rowCount) {
       throw new InvariantError('Songlist was not added');
@@ -74,7 +76,7 @@ class PlaylistsService {
       values: [owner],
     };
 
-    const result = await this._pool.query(query);
+    const result = await this.#pool.query(query);
     return result.rows;
   }
 
@@ -86,7 +88,7 @@ class PlaylistsService {
       values: [id],
     };
 
-    const playlist = await this._pool.query(queryPlaylist);
+    const playlist = await this.#pool.query(queryPlaylist);
 
     if (!playlist.rowCount) {
       throw new NotFoundError('Playlist not found');
@@ -100,7 +102,7 @@ class PlaylistsService {
       values: [playlist.rows[0].id],
     };
 
-    const songs = await this._pool.query(querySongs);
+    const songs = await this.#pool.query(querySongs);
 
     return {
       ...playlist.rows[0],
@@ -114,7 +116,7 @@ class PlaylistsService {
       values: [id],
     };
 
-    const result = await this._pool.query(query);
+    const result = await this.#pool.query(query);
 
     if (!result.rowCount) {
       throw new NotFoundError('Playlist not found');
@@ -127,7 +129,7 @@ class PlaylistsService {
       values: [playlistId, songId],
     };
 
-    const result = await this._pool.query(query);
+    const result = await this.#pool.query(query);
 
     if (!result.rowCount) {
       throw new NotFoundError('Song not found');
@@ -140,7 +142,7 @@ class PlaylistsService {
       values: [id],
     };
 
-    const result = await this._pool.query(query);
+    const result = await this.#pool.query(query);
 
 
     if (!result.rowCount) {
@@ -161,7 +163,7 @@ class PlaylistsService {
       }
 
       try {
-        await this._collaborationsService.verifyCollaborator(playlistId, userId);
+        await this.#collaborationsService.verifyCollaborator(playlistId, userId);
       } catch {
         throw err;
       }
@@ -179,7 +181,7 @@ class PlaylistsService {
       values: [id, playlistId, userId, songId, time, action],
     };
 
-    const result = await this._pool.query(query);
+    const result = await this.#pool.query(query);
 
     if (!result.rowCount) {
       throw new InvariantError('Playlist activity was not added');
@@ -199,7 +201,7 @@ class PlaylistsService {
       values: [playlistId],
     };
 
-    const activities = await this._pool.query(query);
+    const activities = await this.#pool.query(query);
 
     if (!activities.rowCount) {
       throw new NotFoundError('Playlist activities not found');
